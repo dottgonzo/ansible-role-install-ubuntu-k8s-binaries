@@ -1,0 +1,31 @@
+---
+- name: Add Kubernetes GPG key
+  apt_key: url=https://packages.cloud.google.com/apt/doc/apt-key.gpg
+
+- name: Install Kubernetes prerequisites
+  apt:
+    name:
+      [
+        "apt-transport-https",
+        "ca-certificates",
+        "curl",
+        "gnupg2",
+        "software-properties-common",
+      ]
+    update_cache: yes
+
+- name: Add Kubernetes APT repository
+  apt_repository:
+    repo: deb [arch=amd64] https://apt.kubernetes.io/ kubernetes-xenial main
+
+- name: Install Kubernetes binaries
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+      - kubelet
+      - kubeadm
+      - kubectl
+  register: installed
