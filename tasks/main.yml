@@ -29,3 +29,9 @@
       - kubeadm
       - kubectl
   register: installed
+ 
+- name: Delete /etc/containerd/config.toml to enable CRI
+  file:
+    path: /etc/containerd/config.toml
+    state: absent
+    
