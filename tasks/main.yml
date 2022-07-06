@@ -17,6 +17,66 @@
 - name: Add Kubernetes APT repository
   apt_repository:
     repo: deb [arch=amd64] https://apt.kubernetes.io/ kubernetes-xenial main
+ 
+
+- name: Download Containerd from github sources
+  unarchive:
+    src: https://github.com/containerd/containerd/releases/download/v1.6.6/cri-containerd-cni-1.6.6-linux-amd64.tar.gz
+    dest: /
+    remote_src: True
+
+- name: "Create a directory for cni binary"
+  file: 
+    path: /opt/cni/bin/
+    state: directory
+
+- name: "Create a directory for cni config files"
+  file: 
+    path: /etc/cni/net.d/
+    state: directory
+
+- name: "Create a directory for containerd config"
+  file: 
+    path: /etc/containerd 
+    state: directory
+
+- name: "default config containerd"
+  shell: containerd config default>/etc/containerd/config.toml
+
+- name: set true on runtimes.runc.options
+  shell: 'sed -i "s#SystemdCgroup\ \=\ false#SystemdCgroup\ \=\ true#g" /etc/containerd/config.toml'
+
+- name: "Start Containerd"
+  systemd: 
+    name: containerd 
+    daemon_reload: yes 
+    state: started 
+    enabled: yes
+
+- name: "Load br_netfilter kernel module"
+  modprobe:
+    name: br_netfilter
+    state: present
+
+- name: "Load overlay kernel module"
+  modprobe:
+    name: overlay
+    state: present
+
+- name: "Set bridge-nf-call-iptables"
+  sysctl:
+    name: net.bridge.bridge-nf-call-iptables
+    value: 1
+
+- name: "net.bridge.bridge-nf-call-ip6tables"
+  sysctl:
+    name: net.bridge.bridge-nf-call-ip6tables
+    value: 1
+
+- name: "Set ip_forward"
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
 
 - name: Install Kubernetes binaries
   apt:
@@ -29,9 +89,3 @@
       - kubeadm
       - kubectl
   register: installed
- 
-- name: Delete /etc/containerd/config.toml to enable CRI
-  file:
-    path: /etc/containerd/config.toml
-    state: absent
-    
