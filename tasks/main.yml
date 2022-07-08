@@ -89,3 +89,6 @@
       - kubeadm
       - kubectl
   register: installed
+
+- name: apt mark hold Kubernetes
+  shell: 'apt-mark hold kubelet kubeadm kubectl'
