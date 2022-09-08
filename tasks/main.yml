@@ -19,39 +19,39 @@
     repo: deb [arch=amd64] https://apt.kubernetes.io/ kubernetes-xenial main
  
 
-# - name: Download Containerd from github sources
-#   unarchive:
-#     src: https://github.com/containerd/containerd/releases/download/v1.6.8/cri-containerd-cni-1.6.8-linux-amd64.tar.gz
-#     dest: /
-#     remote_src: True
+- name: Download Containerd from github sources
+  unarchive:
+    src: https://github.com/containerd/containerd/releases/download/v1.6.8/cri-containerd-cni-1.6.8-linux-amd64.tar.gz
+    dest: /
+    remote_src: True
 
-# - name: "Create a directory for cni binary"
-#   file: 
-#     path: /opt/cni/bin/
-#     state: directory
+- name: "Create a directory for cni binary"
+  file: 
+    path: /opt/cni/bin/
+    state: directory
 
-# - name: "Create a directory for cni config files"
-#   file: 
-#     path: /etc/cni/net.d/
-#     state: directory
+- name: "Create a directory for cni config files"
+  file: 
+    path: /etc/cni/net.d/
+    state: directory
 
-# - name: "Create a directory for containerd config"
-#   file: 
-#     path: /etc/containerd 
-#     state: directory
+- name: "Create a directory for containerd config"
+  file: 
+    path: /etc/containerd 
+    state: directory
 
-# - name: "default config containerd"
-#   shell: containerd config default>/etc/containerd/config.toml
+- name: "default config containerd"
+  shell: containerd config default>/etc/containerd/config.toml
 
-# - name: set true on runtimes.runc.options
-#   shell: 'sed -i "s#SystemdCgroup\ \=\ false#SystemdCgroup\ \=\ true#g" /etc/containerd/config.toml'
+- name: set true on runtimes.runc.options
+  shell: 'sed -i "s#SystemdCgroup\ \=\ false#SystemdCgroup\ \=\ true#g" /etc/containerd/config.toml'
 
-# - name: "Start Containerd"
-#   systemd: 
-#     name: containerd 
-#     daemon_reload: yes 
-#     state: started 
-#     enabled: yes
+- name: "Start Containerd"
+  systemd: 
+    name: containerd 
+    daemon_reload: yes 
+    state: started 
+    enabled: yes
 
 - name: "Load br_netfilter kernel module"
   modprobe:
