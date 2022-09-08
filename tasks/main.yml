@@ -21,7 +21,7 @@
 
 - name: Download Containerd from github sources
   unarchive:
-    src: https://github.com/containerd/containerd/releases/download/v1.6.6/cri-containerd-cni-1.6.8-linux-amd64.tar.gz
+    src: https://github.com/containerd/containerd/releases/download/v1.6.8/cri-containerd-cni-1.6.8-linux-amd64.tar.gz
     dest: /
     remote_src: True
 
