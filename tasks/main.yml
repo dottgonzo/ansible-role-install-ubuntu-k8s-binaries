@@ -118,6 +118,7 @@
       - kubelet
       - kubeadm
       - kubectl
+      - runc
   register: installed
 
 - name: apt mark hold Kubernetes
