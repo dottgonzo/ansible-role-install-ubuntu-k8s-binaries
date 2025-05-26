@@ -1,6 +1,9 @@
 ---
 - name: Add Kubernetes GPG key
-  apt_key: url=https://packages.cloud.google.com/apt/doc/apt-key.gpg
+  apt_key: 
+    url: https://pkgs.k8s.io/core:/stable:/v1.33/deb/Release.key
+    keyring: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    state: present
 
 - name: Install Kubernetes prerequisites
   apt:
@@ -16,14 +19,41 @@
 
 - name: Add Kubernetes APT repository
   apt_repository:
-    repo: deb [arch=amd64] https://apt.kubernetes.io/ kubernetes-xenial main
- 
+    repo: deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.33/deb/ /
+    state: present
 
 - name: Download Containerd from github sources
   unarchive:
-    src: https://github.com/containerd/containerd/releases/download/v1.6.9/cri-containerd-cni-1.6.9-linux-amd64.tar.gz
-    dest: /
+    src: https://github.com/containerd/containerd/releases/download/v2.1.1/containerd-2.1.1-linux-amd64.tar.gz
+    dest: /tmp
     remote_src: True
+
+- name: Cerca i file da copiare in /tmp/bin
+  ansible.builtin.find:
+    paths: /tmp/bin
+    patterns: '*'       # Cerca tutti i file
+    file_type: file   # Cerca solo file (esclude directory)
+  register: files_da_copiare # Salva i risultati in una variabile
+
+- name: Copia i file trovati in /bin
+  ansible.builtin.copy:
+    src: "{{ item.path }}" # Il percorso completo del file sorgente
+    dest: /usr/local/bin/             # La directory di destinazione
+    remote_src: yes       # Indica che 'src' è sul server remoto
+    mode: '0755'          # Imposta i permessi (opzionale, ma consigliato per /bin)
+  loop: "{{ files_da_copiare.files }}" # Esegui per ogni file trovato
+  when: files_da_copiare.matched > 0 # Esegui solo se sono stati trovati file
+
+- name: Download containerd service file
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/containerd/containerd/main/containerd.service
+    dest: /etc/systemd/system/containerd.service
+    mode: '0644'
+
+- name: Clean up the temporary directory
+  file:
+    path: /tmp/bin
+    state: absent
 
 - name: "Create a directory for cni binary"
   file: 
